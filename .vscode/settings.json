@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "init.h": "c",
+        "module.h": "c",
+        "uaccess.h": "c",
+        "unistd.h": "c"
+    },
+    "C_Cpp.intelliSenseEngineFallback": "Disabled", //需要添加的
+    "C_Cpp.intelliSenseEngine": "Default"  //  需要添加的
+}
