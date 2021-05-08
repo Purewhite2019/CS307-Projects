@@ -1,0 +1,170 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+
+#define MAX_COMM_LEN 100
+
+enum {Free, Used};
+
+typedef struct{     // [begin, end]
+    size_t size;
+
+    int type;
+    char *name;
+    MemRegionNode *mem_last, *mem_next;        // Used by request(), compact() and report()
+    // MemRegionNode *proc_next;       // Used by release()
+    MemRegionNode *larger, *smaller;     // Used by best_fit
+}MemRegionNode;
+
+// typedef struct{
+//     char *name;
+//     MemRegionNode *mem;         // The first memory regions of the process
+// } ProcessNode;
+
+typedef struct{
+    // ProcessNode proc_head;      // The first process in this allocator
+    MemRegionNode mem_head;     // The first memory region in this allocator
+    MemRegionNode *smallest;    // Used by best_fit
+} ContiguousMemoryAllocator;
+
+void init(ContiguousMemoryAllocator* allocator, int _memsize);
+void request(ContiguousMemoryAllocator *allocator, const char *name, char strategy, int need);
+void release(ContiguousMemoryAllocator *allocator, const char *name);
+void compact(ContiguousMemoryAllocator *allocator);
+void report(ContiguousMemoryAllocator *allocator);
+
+int main(int argc, char **argv){
+    ContiguousMemoryAllocator *allocator;
+    int memsize;
+    char comm[MAX_COMM_LEN];
+
+    if(argc != 2){
+        printf("Usage: %s $MemSize.\n", argv[0]);
+        return 1;
+    }
+    memsize = atol(argv[1]);
+    init(allocator, memsize);
+    
+    while(1){
+        printf("allocator>");
+        scanf("%s", comm);
+        if(strcmp(comm, "RQ") == 0){
+            ;
+        }
+        else if(strcmp(comm, "RL") == 0){
+            ;
+        }
+        else if(strcmp(comm, "C") == 0){
+            ;
+        }
+        else if(strcmp(comm, "STAT") == 0){
+            ;
+        }
+        else if(strcmp(comm, "X") == 0){
+            break;
+        }
+    }
+    return 0;
+}
+
+void init(ContiguousMemoryAllocator* allocator, int _memsize){
+    if(_memsize <= 0){
+        printf("Error: invalid memory size.\n");
+        fflush(stdout);
+        exit(1);
+    }
+    allocator = (ContiguousMemoryAllocator*)malloc(sizeof(ContiguousMemoryAllocator));
+    memset(allocator, 0, sizeof(allocator));
+    allocator->mem_head.size = _memsize;
+    allocator->smallest = &(allocator->mem_head);
+}
+
+void request(ContiguousMemoryAllocator *allocator, const char *name, char strategy, int need){
+    if(need <= 0){
+        printf("Error: invalid memory size.\n");
+        fflush(stdout);
+        exit(1);
+    }
+    MemRegionNode *iter = NULL;
+    switch(strategy){
+        case 'F':
+            for(iter = &allocator->mem_head; iter != NULL && (iter->type == Used || iter->size < need); iter = iter->mem_next);
+            break;
+        case 'B':
+            for(iter = allocator->smallest; iter != NULL && (iter->size < need); iter = iter->larger);
+            break;
+        case 'W':
+            for(iter = allocator->smallest; iter->larger != NULL; iter = iter->larger);
+            break;
+        default:
+            printf("Error: invalid allocation strategy.\n");
+            fflush(stdout);
+            exit(1);
+    }
+    
+    if(iter == NULL){
+        printf("Allocation failed: no enough free space.\n");
+        return;
+    }
+
+    iter->type = Used;
+    iter->name = strdup(name);
+
+    if(iter->size > need){
+        MemRegionNode *nr = (MemRegionNode*)malloc(sizeof(MemRegionNode));
+        nr->size = iter->size - need;
+        iter->size = need;
+
+        nr->type = Free;
+        nr->name = NULL;
+
+        nr->mem_last = iter;
+        nr->mem_next = iter->mem_next;
+        nr->mem_last->mem_next = nr;
+        nr->mem_next->mem_last = nr;
+
+        nr->larger = nr->smaller = NULL;
+
+        if(iter->smaller) iter->smaller->larger = iter->larger;
+        if(iter->larger) iter->larger->smaller = iter->smaller;
+        if(allocator->smallest == iter) allocator->smallest = iter->larger;
+
+        if(allocator->smallest->size > nr->size){
+            nr->larger = allocator->smallest;
+            allocator->smallest = nr;
+            nr->larger->smaller = nr;
+        }
+        else{
+            iter = allocator->smallest;
+            while(iter != NULL){
+                if(iter->size > nr->size){
+                    nr->smaller = iter->smaller;
+                    nr->larger = iter;
+                    iter->smaller->larger = nr;
+                    iter->smaller = nr;
+                }
+                if(iter->larger == NULL){
+                    iter->larger = nr;
+                    nr->smaller = iter;
+                    break;
+                }
+            }
+        }
+    }
+
+    else{   // size of <iter> exactly equals to need.
+        if(iter->smaller) iter->smaller->larger = iter->larger;
+        if(iter->larger) iter->larger->smaller = iter->smaller;
+        if(iter == allocator->smallest) allocator->smallest = iter->larger;
+    }
+}
+void release(ContiguousMemoryAllocator *allocator, const char *name){
+    ;
+}
+void compact(ContiguousMemoryAllocator *allocator){
+    ;
+}
+void report(ContiguousMemoryAllocator *allocator){
+    ;
+}

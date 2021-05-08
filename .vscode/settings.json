@@ -6,7 +6,8 @@
         "unistd.h": "c",
         "sched.h": "c",
         "cpu.h": "c",
-        "stddef.h": "c"
+        "stddef.h": "c",
+        "cctype": "c"
     },
     "C_Cpp.intelliSenseEngineFallback": "Disabled", //需要添加的
     "C_Cpp.intelliSenseEngine": "Default"  //  需要添加的
