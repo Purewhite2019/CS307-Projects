@@ -83,7 +83,7 @@ void request(MemRegionNode *head, const char *name, char strategy, int need){
         case 'B':
             for(MemRegionNode *iter = head; iter != NULL; iter = iter->next){
                 if(iter->type == Free && iter->size >= need){
-                    if(choice == NULL || choice->size < iter->size)
+                    if(choice == NULL || iter->size < choice->size)
                         choice = iter;
                 }
             }
@@ -91,7 +91,7 @@ void request(MemRegionNode *head, const char *name, char strategy, int need){
         case 'W':
             for(MemRegionNode *iter = head; iter != NULL; iter = iter->next){
                 if(iter->type == Free && iter->size >= need){
-                    if(choice == NULL || choice->size > iter->size)
+                    if(choice == NULL || iter->size > choice->size)
                         choice = iter;
                 }
             }
