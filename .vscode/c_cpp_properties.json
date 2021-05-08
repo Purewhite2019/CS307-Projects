@@ -3,13 +3,20 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**",
+                "${workspaceFolder}",
                 "/usr/include",
                 "/usr/local/include",
-                "/usr/src/linux-headers-4.4.0-203-generic/include/**",
-                "/usr/src/linux-headers-4.4.0-203-generic/arch/x86/include/**",
-                "/usr/lib/gcc/x86_64-linux-gnu/5/include/"
+                "/usr/src/linux-headers-4.4.0-203-generic/include",
+                "/usr/src/linux-headers-4.4.0-203-generic/arch/x86/include",
+                "/usr/lib/gcc/x86_64-linux-gnu/5/include",
+                "/home/osc/CS307-Projects/lab4"
             ],
+            "browse": {
+                "path":[
+                    "${workspaceFolder}",
+                    "/home/osc/CS307-Projects/lab4"
+                ]
+            },
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "gnu11",
