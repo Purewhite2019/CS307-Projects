@@ -8,7 +8,8 @@
         "cpu.h": "c",
         "stddef.h": "c",
         "cctype": "c",
-        "a.out.h": "c"
+        "a.out.h": "c",
+        "stdio.h": "c"
     },
     "C_Cpp.intelliSenseEngineFallback": "Disabled", //需要添加的
     "C_Cpp.intelliSenseEngine": "Default"  //  需要添加的
