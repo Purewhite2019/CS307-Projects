@@ -8,8 +8,8 @@
 #define VM_SIZE 65536
 #define PAGE_NUM 128
 
-#define TLB_LRU                 // Comment this to use FIFO in TLB replacement.
-#define PR_LRU                  // Comment this to use FIFO in page replacement.
+// #define TLB_LRU                 // Comment this to use FIFO in TLB replacement.
+// #define PR_LRU                  // Comment this to use FIFO in page replacement.
 
 typedef int8_t page_t[256];
 

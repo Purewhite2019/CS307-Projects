@@ -1,9 +1,0 @@
-total 64
-drwxrwxr-x 2 osc osc  4096 May  5 10:20 .
-drwxrwxr-x 6 osc osc  4096 May  5 05:54 ..
--rwxrwxr-x 1 osc osc 17760 May  5 10:20 a.out
--rw-rw-r-- 1 osc osc     0 May  5 10:20 a.txt
--rw-rw-r-- 1 osc osc   155 May  5 02:51 Makefile
--rwxrwxr-x 1 osc osc 13576 May  5 08:58 osh
--rw-rw-r-- 1 osc osc  8732 May  5 10:20 osh.c
--rw-rw-r-- 1 osc osc  1420 May  5 09:10 pipe-example.c

@@ -1,9 +1,3 @@
-/**
- * Kernel module that communicates with /proc file system.
- *
- * This provides the base logic for Project 2 - displaying task information
- */
-
 #include <linux/init.h>
 #include <linux/slab.h>
 #include <linux/sched.h>
@@ -13,108 +7,82 @@
 #include <linux/vmalloc.h>
 #include <asm/uaccess.h>
 
-#define BUFFER_SIZE 128
+#define BUFFER_SIZE 512
 #define PROC_NAME "pid"
 
-/* the current pid */
-static long l_pid;
+static ssize_t proc_read(struct file *file, char __user *usr_buf, size_t count, loff_t *pos);
+static ssize_t proc_write(struct file *file, char __user *usr_buf, size_t count, loff_t *pos);
 
-/**
- * Function prototypes
- */
-static ssize_t proc_read(struct file *file, char *buf, size_t count, loff_t *pos);
-static ssize_t proc_write(struct file *file, const char __user *usr_buf, size_t count, loff_t *pos);
+static pid_t pid = -1;
+static int valid = 0;
 
 static struct file_operations proc_ops = {
-        .owner = THIS_MODULE,
-        .read = proc_read,
+    .owner = THIS_MODULE,
+    .read = proc_read,
+    .write = proc_write
 };
 
-/* This function is called when the module is loaded. */
-static int proc_init(void)
-{
-        // creates the /proc/procfs entry
-        proc_create(PROC_NAME, 0666, NULL, &proc_ops);
-
-        printk(KERN_INFO "/proc/%s created\n", PROC_NAME);
-
-	return 0;
+static int proc_init(void){
+    proc_create(PROC_NAME, 0666, NULL, &proc_ops);
+    printk(KERN_INFO "Proc inited.\n");
+    return 0;
 }
 
-/* This function is called when the module is removed. */
-static void proc_exit(void) 
-{
-        // removes the /proc/procfs entry
-        remove_proc_entry(PROC_NAME, NULL);
-
-        printk( KERN_INFO "/proc/%s removed\n", PROC_NAME);
+static void proc_exit(void){
+    remove_proc_entry(PROC_NAME, NULL);
+    printk(KERN_INFO "Proc exited.\n");
 }
 
-/**
- * This function is called each time the /proc/pid is read.
- * 
- * This function is called repeatedly until it returns 0, so
- * there must be logic that ensures it ultimately returns 0
- * once it has collected the data that is to go into the 
- * corresponding /proc file.
- */
-static ssize_t proc_read(struct file *file, char __user *usr_buf, size_t count, loff_t *pos)
-{
-        int rv = 0;
-        char buffer[BUFFER_SIZE];
-        static int completed = 0;
-        struct task_struct *tsk = NULL;
+static ssize_t proc_read(struct file *file, char __user *usr_buf, size_t count, loff_t *pos){
+    static unsigned completed = 0;
+    int rv = 0;
+    char buffer[BUFFER_SIZE];
+    
+    if(completed){
+        completed = 0;
+        return 0;
+    }
 
-        if (completed) {
-                completed = 0;
-                return 0;
+    if(valid == 0)
+        rv = sprintf(buffer, "Error: PID not loaded.\n");
+    else{
+        struct task_struct* info;
+        if((info = pid_task(find_vpid(pid), PIDTYPE_PID)) == NULL)
+            rv = sprintf(buffer, "Error: PID information access failed, maybe invalid PID.\n");
+        else{
+            rv = sprintf(buffer, "command = [%s] pid = [%d] state = [%ld]\n", info->comm, info->pid, info->state);
         }
-
-        tsk = pid_task(find_vpid(l_pid), PIDTYPE_PID);
-
-        completed = 1;
-
-        // copies the contents of kernel buffer to userspace usr_buf 
-        if (copy_to_user(usr_buf, buffer, rv)) {
-                rv = -1;
-        }
-
-        return rv;
+    }
+    copy_to_user(usr_buf, buffer, rv);
+    completed = 1;
+    return rv;
 }
 
-/**
- * This function is called each time we write to the /proc file system.
- */
-static ssize_t proc_write(struct file *file, const char __user *usr_buf, size_t count, loff_t *pos)
-{
-        char *k_mem;
+static ssize_t proc_write(struct file *file, char __user *usr_buf, size_t count, loff_t *pos){
+    int status = 0;
+    char *k_mem;
 
-        // allocate kernel memory
-        k_mem = kmalloc(count, GFP_KERNEL);
+    k_mem = kmalloc(count, GFP_KERNEL);
+    copy_from_user(k_mem, usr_buf, count);
+    // status  = kstrtol(k_mem, 10, &pid);
+    status = sscanf(k_mem, "%d", &pid);
+    if(pid > 0 && status > 0){
+        printk(KERN_INFO "PID initialized: %d\n", pid);
+        valid = 1;
+    }
+    else{
+        printk(KERN_INFO "Invalid PID. Transformation status: %d\n", pid, status);
+        valid = 0;
+    }
+    kfree(k_mem);
 
-        /* copies user space usr_buf to kernel buffer */
-        if (copy_from_user(k_mem, usr_buf, count)) {
-		printk( KERN_INFO "Error copying from user\n");
-                return -1;
-        }
-
-	/**
- 	 * kstrol() will not work because the strings are not guaranteed
-	 * to be null-terminated.
-	 * 
-	 * sscanf() must be used instead.
-	 */
-
-        kfree(k_mem);
-
-        return count;
+    return count;
 }
 
-/* Macros for registering module entry and exit points. */
-module_init( proc_init );
-module_exit( proc_exit );
+
+module_init(proc_init);
+module_exit(proc_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("Module");
-MODULE_AUTHOR("SGG");
-
+MODULE_DESCRIPTION("Display process information of a given PID");
+MODULE_AUTHOR("purewhite");

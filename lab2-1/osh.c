@@ -2,6 +2,9 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
 
 #define MAX_LINE 80
 // #define AUTO_CURSOR_ENABLE
@@ -158,7 +161,7 @@ void execute(const char* in){
                 exit(EXIT_FAILURE);
             }
             else if(shouldWait){
-                wait();
+                waitpid(pid, NULL, 0);
                 fflush(stdout);
                 // printf("parent wait ok.\n");
             }
@@ -190,7 +193,7 @@ void execute(const char* in){
                 exit(EXIT_FAILURE);
             }
             else if(shouldWait){
-                wait();
+                waitpid(pid, NULL, 0);
                 fflush(stdout);
                 // printf("parent wait ok.\n");
             }
@@ -222,7 +225,7 @@ void execute(const char* in){
                 exit(EXIT_FAILURE);
             }
             else if(shouldWait){
-                wait();
+                waitpid(pid, NULL, 0);
                 fflush(stdout);
                 // printf("parent wait ok.\n");
             }
@@ -267,7 +270,8 @@ void execute(const char* in){
                 exit(EXIT_FAILURE);
             }
             else if(shouldWait){
-                wait();
+                waitpid(pid1, NULL, 0);
+                waitpid(pid2, NULL, 0);
                 fflush(stdout);
                 // printf("parent wait ok.\n");
             }

@@ -31,8 +31,11 @@ int main(void)
     pool_init();
 
     // submit the work to the queue
-    pool_submit(&add,&work);
+    // pool_submit(&add,&work);
 
+    for(int i = 0; i < 10; ++i){
+        pool_submit(&add,&work);
+    }
     // may be helpful 
     sleep(3);
 

@@ -5,4 +5,4 @@ void *worker(void *param);
 void pool_init(void);
 void pool_shutdown(void);
 
-// #define USE_ARRAY_QUEUE
+#define USE_ARRAY_QUEUE
