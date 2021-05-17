@@ -1,0 +1,1 @@
+cmd_/home/osc/CS307-Projects/lab2-2/pid.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000 -T ./scripts/module-common.lds --build-id  -o /home/osc/CS307-Projects/lab2-2/pid.ko /home/osc/CS307-Projects/lab2-2/pid.o /home/osc/CS307-Projects/lab2-2/pid.mod.o

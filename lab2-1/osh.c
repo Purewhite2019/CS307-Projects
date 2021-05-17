@@ -31,15 +31,16 @@ int main(void){
             }
         }
         #endif
-        printf("%d osh>", getpid());
-        fflush(stdout);
+        // printf("%d osh>", getpid());
+        printf("osh>");
+        // fflush(stdout);
         if(getline(&input, &len, stdin) != -1){
             // printf("input %lu: %s", strlen(input), input);
             // fflush(stdout);
         }
         else{
             printf("Command read failed.\n");
-            fflush(stdout);
+            // fflush(stdout);
             continue;
         }
         if(strcmp(input, "exit\n") == 0){
@@ -82,7 +83,7 @@ char* get_token(const char *s, int *iter){
     strncpy(ret, s+*iter, end-*iter);
     *iter = end;
     // printf("token get: | %s | \n", ret);
-    fflush(stdout);
+    // fflush(stdout);
     return ret;
 }
 
@@ -103,7 +104,7 @@ void execute(const char* in){
                     type = Piped;
                 else{
                     printf("Invalid command: multiple pipes or mixed usage of pipe and redirection.\n");
-                    fflush(stdout);
+                    // fflush(stdout);
                     return;
                 }
                 break;
@@ -113,7 +114,7 @@ void execute(const char* in){
                     type = Redirected_Left;
                 else{
                     printf("Invalid command: multiple redirections or mixed usage of pipe and redirection.\n");
-                    fflush(stdout);
+                    // fflush(stdout);
                     return;
                 }
                 break;
@@ -123,7 +124,7 @@ void execute(const char* in){
                     type = Redirected_Right;
                 else{
                     printf("Invalid command: multiple redirections or mixed usage of pipe and redirection.\n");
-                    fflush(stdout);
+                    // fflush(stdout);
                     return;
                 }
                 break;
@@ -161,8 +162,8 @@ void execute(const char* in){
                 exit(EXIT_FAILURE);
             }
             else if(shouldWait){
-                waitpid(pid, NULL, 0);
-                fflush(stdout);
+                wait(NULL);
+                // fflush(stdout);
                 // printf("parent wait ok.\n");
             }
             break;
@@ -193,8 +194,8 @@ void execute(const char* in){
                 exit(EXIT_FAILURE);
             }
             else if(shouldWait){
-                waitpid(pid, NULL, 0);
-                fflush(stdout);
+                wait(NULL);
+                // fflush(stdout);
                 // printf("parent wait ok.\n");
             }
             break;
@@ -225,8 +226,8 @@ void execute(const char* in){
                 exit(EXIT_FAILURE);
             }
             else if(shouldWait){
-                waitpid(pid, NULL, 0);
-                fflush(stdout);
+                wait(NULL);
+                // fflush(stdout);
                 // printf("parent wait ok.\n");
             }
             break;
@@ -234,45 +235,62 @@ void execute(const char* in){
             free(arg[special_pos]);
             arg[special_pos] = NULL;
 
-            int pipefd[2], pid1, pid2;
-            if(pipe(pipefd) == -1){
-                perror("Fatal error: pipe() failed.");
-                exit(EXIT_FAILURE);
-            }
-            if((pid1 = fork()) == -1 || (pid2 = fork()) == -1){
+            pid_t cpid;
+            if((cpid = fork()) == -1){
                 perror("Fatal error: fork() failed.");
                 exit(EXIT_FAILURE);
             }
-            if(pid1 == 0){
-                if(dup2(pipefd[1], STDOUT_FILENO) == -1){
-                    perror("Fatal error: dup2() failed.");
+            
+            else if(cpid == 0){
+                int pipefd[2];
+                pid_t gcpid;
+                if(pipe(pipefd) == -1){
+                    perror("Fatal error: pipe() failed.");
+                    exit(EXIT_FAILURE);
+            }
+                if((gcpid = fork()) == -1){
+                    perror("Fatal error: fork() failed.");
                     exit(EXIT_FAILURE);
                 }
-                if(execvp(arg[0], arg) == -1){
-                    printf("Error: \"");
-                    for(int i = 0; arg[i] != NULL; ++i)
-                        printf("%s ", arg[i]);
-                    printf("\" failed.\n");
+
+                else if(gcpid == 0){
+                    close(pipefd[1]);
+                    if(dup2(pipefd[0], STDIN_FILENO) == -1){
+                        perror("Fatal error: dup2() failed.");
+                        exit(EXIT_FAILURE);
+                    }
+                    close(pipefd[0]);
+                    if(execvp(arg[special_pos + 1], arg+special_pos+1) == -1){
+                        printf("Error: \"");
+                        for(int i = 0; arg[i] != NULL; ++i)
+                            printf("%s ", arg[i]);
+                        printf("\" failed.\n");
+                        exit(EXIT_FAILURE);
+                    }
+                    exit(EXIT_SUCCESS);
                 }
-                exit(EXIT_FAILURE);
+
+                else{
+                    close(pipefd[0]);
+                    if(dup2(pipefd[1], STDOUT_FILENO) == -1){
+                        perror("Fatal error: dup2() failed.");
+                        exit(EXIT_FAILURE);
+                    }
+                    close(pipefd[1]);
+                    if(execvp(arg[0], arg) == -1){
+                        printf("Error: \"");
+                        for(int i = 0; arg[i] != NULL; ++i)
+                            printf("%s ", arg[i]);
+                        printf("\" failed.\n");
+                        exit(EXIT_FAILURE);
+                    }
+                    exit(EXIT_SUCCESS);
+                }
             }
-            else if(pid2 == 0){
-                if(dup2(pipefd[0], STDIN_FILENO) == -1){
-                    perror("Fatal error: dup2() failed.");
-                    exit(EXIT_FAILURE);
-                }
-                if(execvp(arg[special_pos + 1], arg+special_pos+1) == -1){
-                    printf("Error: \"");
-                    for(int i = 0; arg[i] != NULL; ++i)
-                        printf("%s ", arg[i]);
-                    printf("\" failed.\n");
-                }
-                exit(EXIT_FAILURE);
-            }
+
             else if(shouldWait){
-                waitpid(pid1, NULL, 0);
-                waitpid(pid2, NULL, 0);
-                fflush(stdout);
+                wait(NULL);
+                // fflush(stdout);
                 // printf("parent wait ok.\n");
             }
             break;

@@ -1,0 +1,4 @@
+kernel//home/osc/CS307-Projects/lab1/hello.ko
+kernel//home/osc/CS307-Projects/lab1/jiffies.ko
+kernel//home/osc/CS307-Projects/lab1/seconds.ko
+kernel//home/osc/CS307-Projects/lab1/simple.ko

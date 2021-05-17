@@ -1,0 +1,33 @@
+Running task = [T1] [40] [50] for 10 units.
+Running task = [T2] [40] [50] for 10 units.
+Running task = [T3] [40] [50] for 10 units.
+Running task = [T4] [40] [50] for 10 units.
+Running task = [T5] [40] [50] for 10 units.
+Running task = [T6] [40] [50] for 10 units.
+Running task = [T1] [40] [40] for 10 units.
+Running task = [T2] [40] [40] for 10 units.
+Running task = [T3] [40] [40] for 10 units.
+Running task = [T4] [40] [40] for 10 units.
+Running task = [T5] [40] [40] for 10 units.
+Running task = [T6] [40] [40] for 10 units.
+Running task = [T1] [40] [30] for 10 units.
+Running task = [T2] [40] [30] for 10 units.
+Running task = [T3] [40] [30] for 10 units.
+Running task = [T4] [40] [30] for 10 units.
+Running task = [T5] [40] [30] for 10 units.
+Running task = [T6] [40] [30] for 10 units.
+Running task = [T1] [40] [20] for 10 units.
+Running task = [T2] [40] [20] for 10 units.
+Running task = [T3] [40] [20] for 10 units.
+Running task = [T4] [40] [20] for 10 units.
+Running task = [T5] [40] [20] for 10 units.
+Running task = [T6] [40] [20] for 10 units.
+Running task = [T1] [40] [10] for 10 units.
+Running task = [T2] [40] [10] for 10 units.
+Running task = [T3] [40] [10] for 10 units.
+Running task = [T4] [40] [10] for 10 units.
+Running task = [T5] [40] [10] for 10 units.
+Running task = [T6] [40] [10] for 10 units.
+Average Response Time: 25.000000
+Average Waiting Time: 225.000000
+Average Turnaround Time: 325.000000

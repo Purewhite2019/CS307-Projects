@@ -1,3 +1,6 @@
+#ifndef _BANKER_H
+#define _BANKER_H
+
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
@@ -12,3 +15,5 @@ extern int need[][NUMBER_OF_RESOURCES];
 
 int request_resources(int customer_num, int request[]);
 void release_resources(int customer_num, int release[]);
+
+#endif

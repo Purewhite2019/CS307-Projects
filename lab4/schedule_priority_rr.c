@@ -27,7 +27,7 @@ void add(char *name, int priority, int burst){
     np->next = NULL;
     strcpy(np->task->name, name);
 
-    while(iter->next != NULL && iter->next->task->priority > priority) iter = iter->next;
+    while(iter->next != NULL && iter->next->task->priority >= priority) iter = iter->next;
     if(iter->next == NULL)
         iter->next = np;
     else{
@@ -54,6 +54,7 @@ void schedule(){
             current_time += RR_TIME_SLICE;
             run(iter->task, RR_TIME_SLICE);
             iter->task->burst -= RR_TIME_SLICE;
+            // printf("%d running for %d, in total %d\n", iter->task->tid, RR_TIME_SLICE, iter->task->burst);
         }
         else{
             current_time += iter->task->burst;
@@ -61,16 +62,15 @@ void schedule(){
             turnaround_time += current_time;
             run(iter->task, iter->task->burst);
             iter->task->burst = 0;
+            // printf("%d end.\n", iter->task->tid);
         }
-        if(iter->next != NULL && iter->next->task->priority < iter->task->priority){
+        if(iter->next == NULL || iter->next->task->priority < iter->task->priority){
             while(chead != NULL && chead->task->priority == iter->task->priority && chead->task->burst == 0)
                 chead = chead->next;
             iter = chead;
         }
-        else if(iter->next != NULL)
-            iter = iter->next;
         else
-            break;
+            iter = iter->next;
     }
 
     response_time /= tid_cur;

@@ -1,7 +1,6 @@
 /**
  * Implementation of thread pool.
  */
-/*: Question: Why "initialization from incompatible pointer type" when using LinkNode implementation? */
 #include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
