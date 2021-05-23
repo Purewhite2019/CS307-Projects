@@ -6,7 +6,7 @@
 #include <stdint.h>
 
 #define VM_SIZE 65536
-#define PAGE_NUM 128
+#define PAGE_NUM 256
 
 // #define TLB_LRU                 // Comment this to use FIFO in TLB replacement.
 // #define PR_LRU                  // Comment this to use FIFO in page replacement.
@@ -72,7 +72,7 @@ int8_t maccess(FILE *fd, int addr){
             #endif
             ++TLB_hit_cnt;
             ++cur_tick;
-            return frame_num*sizeof(page_t)+off;
+            return (*(memory[frame_num]))[off];
         }
     }
     // TLB miss
@@ -89,6 +89,8 @@ int8_t maccess(FILE *fd, int addr){
             }
         }
         page_table[pn] = replace_num;
+        if(memory[replace_num] != NULL)
+            free(memory[replace_num]);
         memory[replace_num] = swap_in(fd, pn);
         memref_tick[replace_num] = cur_tick;
         ++page_fault_cnt;
@@ -99,7 +101,7 @@ int8_t maccess(FILE *fd, int addr){
     memref_tick[frame_num] = cur_tick;
     #endif
 
-    int replace_num = 0;        // TLB replacement using LRU
+    int replace_num = 0;        // TLB replacement
     for(int i = 1; i < 16; ++i){
         if(TLB[replace_num].tick > TLB[i].tick)
             replace_num = i;
@@ -130,12 +132,14 @@ int paddr(FILE *fd, int addr){
 int main(int argc, char **argv){
     if(argc != 2){
         printf("Usage: %s <input file>.\n", argv[0]);
+        exit(1);
     }
     FILE *fd, *in;
     int taddr, val;
     memset(page_table, -1, sizeof(page_table));
     memset(TLB, -1, sizeof(TLB));
     memset(memref_tick, -1, sizeof(memref_tick));
+    memset(memory, 0, sizeof(memory));
     if((fd = fopen("BACKING_STORE.bin", "r")) == NULL){
         perror("Error: fopen() failed.");
         exit(1);

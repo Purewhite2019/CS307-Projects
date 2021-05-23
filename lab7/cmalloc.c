@@ -120,6 +120,31 @@ void request(MemRegionNode *head, const char *name, char strategy, int need){
             choice->next = np;
             if(np->next) np->next->last = np;
         }
+        MemRegionNode *tmp;
+        if(choice->next && choice->next->type == Used && strcmp(choice->next->name, choice->name) == 0){
+            tmp = choice->next;
+            choice->size += tmp->size;
+            choice->next = tmp->next;
+            if(tmp->next)
+                tmp->next->last = choice;
+            free(tmp);
+        }
+        if(choice->last && choice->last->type == Used && strcmp(choice->last->name, choice->name) == 0){
+            if(choice->last != head){
+                tmp = choice->last;
+                choice->size += tmp->size;
+                choice->last = tmp->last;
+                if(tmp->last)
+                    tmp->last->next = choice;
+                free(tmp);
+            }
+            else{
+                head->size += choice->size;
+                head->next = choice->next;
+                if(choice->next) choice->next->last = head;
+                free(choice);
+            }
+        }
     }
 }
 

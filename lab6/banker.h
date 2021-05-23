@@ -3,7 +3,8 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <errno.h>
+#include <error.h>
+#include <stdlib.h>
 
 #define NUMBER_OF_CUSTOMERS 5
 #define NUMBER_OF_RESOURCES 4

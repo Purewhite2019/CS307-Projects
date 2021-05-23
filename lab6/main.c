@@ -44,7 +44,7 @@ int main(int argc, char **argv){
                 else if(command[1] == 'L'){
                     int num, request[NUMBER_OF_RESOURCES];
                     scanf("%d", &num);
-                    for(int i = 0; i < NUMBER_OF_CUSTOMERS; ++i)
+                    for(int i = 0; i < NUMBER_OF_RESOURCES; ++i)
                         scanf("%d", request+i);
                     release_resources(num, request);
                 }

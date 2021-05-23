@@ -15,19 +15,21 @@ int request_resources(int customer_num, int request[]){
     memcpy(Need, need, sizeof(need));
 
     for(int k = 0; k < NUMBER_OF_RESOURCES; ++k){   // If request is out of Need bound || is out of Available bound
-        if(request[k] > Need[customer_num][k] || request[k] > Available[k])
+        if(request[k] > Need[customer_num][k] || request[k] > Available[k]){
             return -1;
+        }
         Available[k] -= request[k];
         Need[customer_num][k] -= request[k];
         Allocation[customer_num][k] += request[k];
     }
-    for(int i = 0; i < NUMBER_OF_CUSTOMERS; ++i){
-        for(int j = 0; j < NUMBER_OF_CUSTOMERS; ++j){
-            while(isFed[j] && j < NUMBER_OF_CUSTOMERS) ++j; // Omit customers that are fed
-            if(j == NUMBER_OF_CUSTOMERS)
-                return -1;
 
-            int canBeFed = 1;   // If customer j can be fed
+    int isRunning = 1;   // If customer j can be fed
+    while(isRunning){
+        isRunning = 0;
+        for(int j = 0; j < NUMBER_OF_CUSTOMERS; ++j){
+            if(isFed[j])
+                continue;
+            int canBeFed = 1;
             for(int k = 0; k < NUMBER_OF_RESOURCES; ++k){
                 if(Need[j][k] > Available[k]){
                     canBeFed = 0;
@@ -36,25 +38,37 @@ int request_resources(int customer_num, int request[]){
             }
             if(canBeFed){
                 isFed[j] = 1;
+                isRunning = 1;
                 for(int k = 0; k < NUMBER_OF_RESOURCES; ++k)
                     Available[k] += Allocation[j][k];
             }
         }
     }
-    for(int k = 0; k < NUMBER_OF_RESOURCES; ++k){   // If request is out of Need bound || is out of Available bound
-        available[k] -= request[k];
-        need[customer_num][k] -= request[k];
-        allocation[customer_num][k] += request[k];
+    int isOK = 1;
+    for(int i = 0; i < NUMBER_OF_CUSTOMERS; ++i)
+        if(!isFed[i]){
+            isOK = 0;
+            break;
+        }
+    if(isOK){
+        for(int k = 0; k < NUMBER_OF_RESOURCES; ++k){   // If request is out of Need bound || is out of Available bound
+            available[k] -= request[k];
+            need[customer_num][k] -= request[k];
+            allocation[customer_num][k] += request[k];
+        }
+        return 0;
     }
-    return 0;
+    else
+        return -1;
 }
 
 void release_resources(int customer_num, int release[]){
-    for(int i = 0; i < NUMBER_OF_RESOURCES; ++i){
+    for(int i = 0; i < NUMBER_OF_RESOURCES; ++i)
         if(allocation[customer_num][i] < release[i]){
-            error(-1, 1, "Customer %d: releasing Request %d is greater than allocated resources %d.", customer_num, release[i], allocation[customer_num][i]);
-            exit(1);
+            fprintf(stderr, "Customer %d: releasing request %d is greater than allocated resources %d.\n", customer_num, release[i], allocation[customer_num][i]);
+            return;
         }
+    for(int i = 0; i < NUMBER_OF_RESOURCES; ++i){
         available[i] += release[i];
         allocation[customer_num][i] -= release[i];
         need[customer_num][i] += release[i];
